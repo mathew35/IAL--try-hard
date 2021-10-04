@@ -1,1 +1,5 @@
-
+To  do:
+Basic idea : Načítame zo suboru hrany a strany + prevediieme do nejakej štruktury (nafukovacie pole napr.)
+musime najst vhodny algoritmus na prejdenie grafov
+myšlienka je hladat skriženia.
+alebo metoda pešca
