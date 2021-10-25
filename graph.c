@@ -11,6 +11,7 @@
 */
 #include "array.h"
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <string.h>
 #include <stdlib.h>
