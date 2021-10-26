@@ -6,6 +6,9 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+
+#define LINE_LEN 100
+
 typedef struct {
     char **data;
     size_t pocetriadkov;
