@@ -6,5 +6,17 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
+typedef struct tpoint{
+    size_t num;
+    struct tpoint** edges;
+    struct tpoint* n_point;
+    size_t degree;
+    bool visited;
+}point;
+typedef struct{
+    int p_sum;
+    point** points;
+    point*  first_p;
+}graph;
 
-void solvegraph(Array graf);
+void solvegraph();
