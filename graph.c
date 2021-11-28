@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
   //pole testing
 
   size_t linelen = 100;
+  //free this char *line at the end!!!
   char *line = malloc(linelen);
   Array *grafy = NULL;
   grafy = malloc(sizeof(Array));
@@ -116,6 +117,7 @@ int main(int argc, char *argv[]) {
   }
   //upratovanie  pameti
   freeArray(grafy);
+  free(line);
    return 0;
 
 }

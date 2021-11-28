@@ -66,7 +66,6 @@ void rearrEdges(point* P,int oldDegree){
     }
 }
 void addEdge(point* P1,point* P2){
-    printf("Adding EdgePoint %ld to point %ld\n",P2->num,P1->num);
     point** newEdges=malloc(sizeof(point)*(P1->degree+1));
     for(int i=0;i<P1->degree;i++){
         newEdges[i]=P1->edges[i];
@@ -91,6 +90,64 @@ void checkEdgePoints(graph *G){
                 addEdge(G->points[i]->edges[j],G->points[i]);
             }
         }
+    }
+}
+void rmEdge(point* P1,point* P2){    
+    int actDegree=P1->degree;
+    int j=0;
+    while(j<actDegree){
+        if(P1->edges[j]->num==P2->num){
+            P1->edges[j]=NULL;
+            P1->degree--;
+            rearrEdges(P1,actDegree);
+            actDegree--;
+        }
+        j++;
+    }          
+}
+void tieEdge(point* P1,point* P2){
+    bool haveEdge=false;
+    int i=0;
+    while(!haveEdge&&i<P1->degree){
+        if(P1->edges[i]==P2){
+            haveEdge=true;
+        }
+        i++;
+    }
+    if(!haveEdge){
+        addEdge(P1,P2);
+    }
+}
+void rmPoint(graph* G,int i){
+    point** newPoints=(point**)malloc(sizeof(point)*(G->p_sum-1));
+    if(G->points[i]->degree>0){
+        rmEdge(G->points[i]->edges[0],G->points[i]);
+    }
+    if(G->points[i]->degree>1){
+        rmEdge(G->points[i]->edges[1],G->points[i]);
+        tieEdge(G->points[i]->edges[0],G->points[i]->edges[1]);
+    }
+    point** tmp=G->points;
+    for(int j=0;j<i;j++){
+        newPoints[j]=G->points[j];
+    }
+    for(int j=i+1;j<G->p_sum;j++){
+        newPoints[j-1]=G->points[j];
+    }
+    free(G->points[i]->edges);
+    free(G->points[i]);
+    G->points=newPoints;
+    G->p_sum--;
+    free(tmp);
+}
+void rmExcessPoints(graph* G){
+    int i=0;
+    while(i<G->p_sum&&G->p_sum>2){
+        if(G->points[i]->degree<3){
+            rmPoint(G,i);
+            i--;
+        }
+        i++;
     }
 }
 void freeGraph(graph* G){
@@ -154,8 +211,9 @@ void solvegraph(Array *grafy){
     graph *Graph=(graph *)malloc(sizeof(graph));
     initGraph(Graph);//workaround nonexistent input
     fprintf(stdout,"Graph p_sum %d\n",Graph->p_sum);
-    while(Graph->p_sum>1){
+    if(true){//true change for "Graph->p_sum>5"
         for(int i=0;i<Graph->p_sum;i++){
+<<<<<<< HEAD
             bool rm=false;
             int actDegree=Graph->points[i]->degree;
             for(int j=0;j<actDegree;j++){
@@ -176,14 +234,29 @@ void solvegraph(Array *grafy){
                 if(Graph->points[i]->degree==2){                    
                 }
             }
+=======
+            rmEdge(Graph->points[i],Graph->points[i]);
+>>>>>>> b599bd136a2e6f83dd0ec87a7d2ffee39114bd43
         }
         checkEdgePoints(Graph);
-        s=0;
-        Graph->p_sum=0;
     }
+    for(int i=0;i<Graph->p_sum;i++){
+        printf("Point:%ld|",Graph->points[i]->num);
+        for(int j=0;j<Graph->points[i]->degree;j++){
+            if(Graph->points[i]->edges[j]!=NULL){
+                printf("%ld ",Graph->points[i]->edges[j]->num);                
+            }
+        }
+        printf("\n");
+    }
+    printf("\n");
+    
+    rmExcessPoints(Graph);
+    /*while(Graph->p_sum>2){
+        s=0;
+    }*/
 
     //workaround check
-    Graph->p_sum=4;
     for(int i=0;i<Graph->p_sum;i++){
         printf("Point:%ld|",Graph->points[i]->num);
         for(int j=0;j<Graph->points[i]->degree;j++){
