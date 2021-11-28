@@ -2,12 +2,14 @@
 *
 * @author Matúš Vráblik <xvrabl05@vutbr.cz>
 */
-
+#include <string.h>
 #include "solution.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+
+#include <ctype.h>
 void initGraph(graph *G){
     G->p_sum=4;
     G->points=(point **)malloc(sizeof(point)*4);
@@ -99,7 +101,55 @@ void freeGraph(graph* G){
     free(G->points);
     free(G);
 }
-void solvegraph(){
+
+void solvegraph(Array *grafy){
+
+    int j = 0;
+    int** matrixgraph = (int **) malloc(grafy->pocetriadkov+1 * sizeof(int *));
+    for (int i = 0; i < grafy->pocetriadkov; ++i){   
+        int x = 0;
+        int str_length = strlen(grafy->data[i]);
+        //    fprintf(stdout,"----%d.---- >/", str_length);
+        int *riadok = (int *) malloc (str_length * sizeof (int));
+        matrixgraph[i] = (int *) malloc(1+str_length * sizeof(int));
+        int o = 2;
+        //int matrixgraph[i][str_length];
+
+        for (j = 0; grafy->data[i][j] != '\0'; j++) {
+                
+            if (isdigit(grafy->data[i][j])){
+                fprintf(stdout,"na3iel som cislo>%d", grafy->data[i][j]);
+                *riadok = grafy->data[i][j];
+
+                x =  (x*10 + *riadok - '0' );
+                fprintf(stdout,"rozsirujem cislo>%d \n", x); 
+                
+                matrixgraph[i][o-1] = x ;
+                fprintf(stdout,"vkladam cislo>%d na %dx%d\n", x,i,o-1);                     
+            }
+            else { 
+
+                x = 0;
+               
+                o++;
+                 matrixgraph[i][0] = o - 3;
+            }
+
+        }
+    }
+    int a,b;
+    printf("\n");
+    for(a=0;a<grafy->pocetriadkov;a++)
+     {
+          
+          for(b=0;b<= matrixgraph[a][0];b++)
+          {
+               printf("%3d ",matrixgraph[a][b]);
+               /*Here, %3d takes 3 digit space for each digit while printing  output */
+          }
+          printf("\n");
+
+    }
     int s=1;
     graph *Graph=(graph *)malloc(sizeof(graph));
     initGraph(Graph);//workaround nonexistent input
@@ -116,6 +166,7 @@ void solvegraph(){
                     rm=true;
                 }
             }
+    
             if(rm){
                 rearrEdges(Graph->points[i],actDegree);            
             }

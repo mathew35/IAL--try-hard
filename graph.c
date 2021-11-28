@@ -55,11 +55,11 @@ int main(int argc, char *argv[]) {
     insertstring(grafy, line);
     }
     for (int i = 0; i < grafy->pocetriadkov; ++i){
-      fprintf(stdout,"%d. :", i);
-      fprintf(stdout,"%s", grafy->data[i]);
+      //fprintf(stdout,"%d. :", i);
+     // fprintf(stdout,"%s", grafy->data[i]);
     }
       fclose(file);
-    solvegraph();//*grafy as input later on
+    solvegraph(grafy);//*grafy as input later on
   }
     //pripadne argumenty pre debug a podobne
   else{
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
     if (c == '#'){    printf("Nacitam nazov: %c\n", c);
     //fseek(file, -1L, SEEK_CUR);
     dynamic_fgets(&line, &linelen, file);
-      printf("%s\n", line);
+     // printf("%s\n", line);
       c = fgetc(file);
       if (c == '#'){ printf("Prazdne grafy nebereme\n"); return 0;}
       fseek(file, -1L, SEEK_CUR);
@@ -105,12 +105,12 @@ int main(int argc, char *argv[]) {
         fseek(file, -1L, SEEK_CUR);}
     }
         fclose(file);//subor precitany
-      fprintf(stdout,"toto je ulozene:");
+     // fprintf(stdout,"toto je ulozene:");
         // automatically resizes as necessary
-            fprintf(stdout,"%s ", grafy->data[0]);
+         //   fprintf(stdout,"%s ", grafy->data[0]);
         for (int i = 0; i < grafy->pocetriadkov; ++i){
           fprintf(stdout,"%d. >", i);
-          fprintf(stdout,"%s", grafy->data[i]);
+          //fprintf(stdout,"%s", grafy->data[i]);
         }
       printf("pocet pouzitych%ld\n", grafy->pocetriadkov);
   }

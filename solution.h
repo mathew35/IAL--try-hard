@@ -19,4 +19,4 @@ typedef struct{
     point*  first_p;
 }graph;
 
-void solvegraph();
+void solvegraph(Array *grafy);
