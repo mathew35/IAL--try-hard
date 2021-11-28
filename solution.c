@@ -10,46 +10,56 @@
 #include <stdbool.h>
 
 #include <ctype.h>
-void initGraph(graph *G){
-    G->p_sum=4;
-    G->points=(point **)malloc(sizeof(point)*4);
-    for(int i=0;i<G->p_sum;i++){
-        G->points[i]=(point *)malloc(sizeof(point));
-    };
-    G->first_p=G->points[0];
-    G->points[0]->degree=2;
-    G->points[0]->num=1;
+int** parseGraph(Array *grafy){
+    int j = 0;
+    int** matrixgraph = (int **) malloc(grafy->pocetriadkov+1 * sizeof(int *));
+    for (int i = 0; i < grafy->pocetriadkov; ++i){   
+        int x = 0;
+        int str_length = strlen(grafy->data[i]);
+        //    fprintf(stdout,"----%d.---- >/", str_length);
+        int *riadok = (int *) malloc (str_length * sizeof (int));
+        matrixgraph[i] = (int *) malloc(1+str_length * sizeof(int));
+        int o = 2;
+        //int matrixgraph[i][str_length];
 
-    G->points[1]->degree=3;
-    G->points[1]->num=2;
+        for (j = 0; grafy->data[i][j] != '\0'; j++) {
+                
+            if (isdigit(grafy->data[i][j])){
+                //fprintf(stdout,"na3iel som cislo>%d", grafy->data[i][j]);
+                *riadok = grafy->data[i][j];
 
-    G->points[2]->degree=1;
-    G->points[2]->num=3;
+                x =  (x*10 + *riadok - '0' );
+                //fprintf(stdout,"rozsirujem cislo>%d \n", x); 
+                
+                matrixgraph[i][o-1] = x ;
+                //fprintf(stdout,"vkladam cislo>%d na %dx%d\n", x,i,o-1);                     
+            }
+            else { 
 
-    G->points[3]->degree=3;
-    G->points[3]->num=4;
+                x = 0;
+               
+                o++;
+                 matrixgraph[i][0] = o - 3;
+            }
 
-    G->points[0]->edges=(point **)malloc(sizeof(point)*2);
-    G->points[0]->edges[0]=G->points[1];
-    G->points[0]->edges[1]=G->points[3];
-    G->points[0]->n_point=G->points[1];
+        }
+        free(riadok);
+    }
+    int a,b;
+    //printf("\n");
+    for(a=0;a<grafy->pocetriadkov;a++)
+     {
+          
+          for(b=0;b<= matrixgraph[a][0]+1;b++)
+          {
+               //printf("%3d ",matrixgraph[a][b]);
+               /*Here, %3d takes 3 digit space for each digit while printing  output */
+          }
+          //printf("\n");
 
-
-    G->points[1]->edges=(point **)malloc(sizeof(point)*3);
-    G->points[1]->edges[0]=G->points[3];
-    G->points[1]->edges[1]=G->points[2];
-    G->points[1]->edges[2]=G->points[0];
-    G->points[1]->n_point=G->points[2];
-
-    G->points[2]->edges=(point **)malloc(sizeof(point)*1);
-    G->points[2]->edges[0]=G->points[1];
-    G->points[2]->n_point=G->points[3];
-
-    G->points[3]->edges=(point **)malloc(sizeof(point)*3);
-    G->points[3]->edges[0]=G->points[3];
-    G->points[3]->edges[1]=G->points[2];
-    G->points[3]->edges[2]=G->points[3];
-    G->points[3]->n_point=NULL;
+    }
+    return matrixgraph;
+    
 }
 void rearrEdges(point* P,int oldDegree){
     point** newEdges=(point **)malloc(sizeof(point)*P->degree);
@@ -99,11 +109,10 @@ void rmEdge(point* P1,point* P2){
         if(P1->edges[j]->num==P2->num){
             P1->edges[j]=NULL;
             P1->degree--;
-            rearrEdges(P1,actDegree);
-            actDegree--;
         }
         j++;
-    }          
+    }             
+    rearrEdges(P1,actDegree); 
 }
 void tieEdge(point* P1,point* P2){
     bool haveEdge=false;
@@ -116,6 +125,7 @@ void tieEdge(point* P1,point* P2){
     }
     if(!haveEdge){
         addEdge(P1,P2);
+        addEdge(P2,P1);
     }
 }
 void rmPoint(graph* G,int i){
@@ -158,85 +168,54 @@ void freeGraph(graph* G){
     free(G->points);
     free(G);
 }
-
-void solvegraph(Array *grafy){
-
-    int j = 0;
-    int** matrixgraph = (int **) malloc(grafy->pocetriadkov+1 * sizeof(int *));
-    for (int i = 0; i < grafy->pocetriadkov; ++i){   
-        int x = 0;
-        int str_length = strlen(grafy->data[i]);
-        //    fprintf(stdout,"----%d.---- >/", str_length);
-        int *riadok = (int *) malloc (str_length * sizeof (int));
-        matrixgraph[i] = (int *) malloc(1+str_length * sizeof(int));
-        int o = 2;
-        //int matrixgraph[i][str_length];
-
-        for (j = 0; grafy->data[i][j] != '\0'; j++) {
-                
-            if (isdigit(grafy->data[i][j])){
-                fprintf(stdout,"na3iel som cislo>%d", grafy->data[i][j]);
-                *riadok = grafy->data[i][j];
-
-                x =  (x*10 + *riadok - '0' );
-                fprintf(stdout,"rozsirujem cislo>%d \n", x); 
-                
-                matrixgraph[i][o-1] = x ;
-                fprintf(stdout,"vkladam cislo>%d na %dx%d\n", x,i,o-1);                     
-            }
-            else { 
-
-                x = 0;
-               
-                o++;
-                 matrixgraph[i][0] = o - 3;
-            }
-
+void freeParsed(int** matrix){
+    int i=0;
+    while(matrix[i]){
+        free(matrix[i]);
+        i++;
+    }
+    free(matrix);
+}
+void initGraph(graph *G,int** matrixGraph,int rowCount){
+    G->p_sum=rowCount;
+    G->points=(point **)malloc(sizeof(point)*G->p_sum);
+    for(int i=0;i<G->p_sum;i++){
+        G->points[i]=(point *)malloc(sizeof(point));
+        G->points[i]->degree=matrixGraph[i][0];
+        G->points[i]->num=matrixGraph[i][1];
+        G->points[i]->edges=(point **)malloc(sizeof(point)*G->points[i]->degree);
+        for(int j=0;j<G->points[i]->degree;j++){
+            G->points[i]->edges[j]=G->points[matrixGraph[i][j+2]-1];
         }
-    }
-    int a,b;
-    printf("\n");
-    for(a=0;a<grafy->pocetriadkov;a++)
-     {
-          
-          for(b=0;b<= matrixgraph[a][0];b++)
-          {
-               printf("%3d ",matrixgraph[a][b]);
-               /*Here, %3d takes 3 digit space for each digit while printing  output */
-          }
-          printf("\n");
-
-    }
+        if(i+1!=G->p_sum){
+            G->points[i]->n_point=G->points[i+1];
+        }
+        else{
+            G->points[i]->n_point=NULL;
+        }
+    };
+    for(int i=0;i<G->p_sum;i++){
+        for(int j=0;j<G->points[i]->degree;j++){
+            G->points[i]->edges[j]=G->points[matrixGraph[i][j+2]-1];
+        }
+        if(i+1!=G->p_sum){
+            G->points[i]->n_point=G->points[i+1];
+        }
+        else{
+            G->points[i]->n_point=NULL;
+        }
+    };
+    G->first_p=G->points[0];
+    freeParsed(matrixGraph);
+}
+void solvegraph(Array *grafy){
     int s=1;
     graph *Graph=(graph *)malloc(sizeof(graph));
-    initGraph(Graph);//workaround nonexistent input
+    initGraph(Graph,parseGraph(grafy),grafy->pocetriadkov);//workaround nonexistent input
     fprintf(stdout,"Graph p_sum %d\n",Graph->p_sum);
-    if(true){//true change for "Graph->p_sum>5"
+    if(Graph->p_sum>2){//true change for "Graph->p_sum>5"
         for(int i=0;i<Graph->p_sum;i++){
-<<<<<<< HEAD
-            bool rm=false;
-            int actDegree=Graph->points[i]->degree;
-            for(int j=0;j<actDegree;j++){
-                if(Graph->points[i]->edges[j]->num==Graph->points[i]->num){
-                    //#1 problem: removing connections SOLVED!
-                    Graph->points[i]->edges[j]=NULL;
-                    Graph->points[i]->degree--;
-                    rm=true;
-                }
-            }
-    
-            if(rm){
-                rearrEdges(Graph->points[i],actDegree);            
-            }
-            if(Graph->points[i]->degree<3){
-                if(Graph->points[i]->degree==1){
-                }
-                if(Graph->points[i]->degree==2){                    
-                }
-            }
-=======
             rmEdge(Graph->points[i],Graph->points[i]);
->>>>>>> b599bd136a2e6f83dd0ec87a7d2ffee39114bd43
         }
         checkEdgePoints(Graph);
     }
