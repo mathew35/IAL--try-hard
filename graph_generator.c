@@ -61,7 +61,10 @@ int main(int argc, char* argv[]){
         printf("ERROR: File creation\n");
         return 1;
     }
-
+    
+    /* set seed to get random numbers */
+    srand(time(NULL));
+    
     /* Now the generating of graphs begins */
     for (int i = 1; i <= graphCount; ++i) {
         /* Print of:
