@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
 
     FILE *fp;
     unsigned graphCount, maxNumberOfNodes, maxNodeDegree, randomNodeNumber, nodeDegree, randomNode;
-    char *hashtag = "###########################################\n";
+    //char *hashtag = "###########################################\n";
 
     /* Check of values given in argument */
     graphCount = strtoul(argv[1], NULL, 10);
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]){
          * ############
          * # Graph %i
          */
-        fputs(hashtag, fp);
+        //fputs(hashtag, fp);
 
         char graphNum[5], graph[20] = "# Graph ";
         sprintf(graphNum, "%d\n", i);
