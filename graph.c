@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
      // fprintf(stdout,"%s", grafy->data[i]);
     }
       fclose(file);
-    solvegraph(grafy,arr);//*grafy as input later on
+    solvegraph(grafy,arr,y);//*grafy as input later on
   }
     //pripadne argumenty pre debug a podobne
   else{
