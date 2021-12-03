@@ -160,6 +160,27 @@ void rmExcessPoints(graph* G){
         i++;
     }
 }
+void rmExcessEdges(graph* G){
+    for(int i=0;i<G->p_sum;i++){
+        rmEdge(G->points[i],G->points[i]);
+    }
+    int *edges=malloc(sizeof(int)*G->p_sum);
+    for(int j=0;j<G->p_sum;j++){
+        for(int i=0;i<G->p_sum;i++){
+            edges[i]=0;
+        }
+        for(int k=0;G->points[j]->edges[k];k++){
+            edges[G->points[j]->edges[k]->num-1]++;
+        }
+        for(int k=0;k<G->p_sum;k++){
+            if(edges[k]>1){
+                rmEdge(G->points[j],G->points[k]);
+                addEdge(G->points[j],G->points[k]);
+            }
+        }
+    }
+    free(edges);
+}
 void freeGraph(graph* G){
     for(int i=0;i<G->p_sum;i++){
         free(G->points[i]->edges);
@@ -208,15 +229,13 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
     G->first_p=G->points[0];
     freeParsed(matrixGraph);
 }
-void solvegraph(Array *grafy){
+void solvegraph(Array *grafy,int *beginGraphs){
     int s=1;
     graph *Graph=(graph *)malloc(sizeof(graph));
     initGraph(Graph,parseGraph(grafy),grafy->pocetriadkov);//workaround nonexistent input
     fprintf(stdout,"Graph p_sum %d\n",Graph->p_sum);
     if(Graph->p_sum>2){//true change for "Graph->p_sum>5"
-        for(int i=0;i<Graph->p_sum;i++){
-            rmEdge(Graph->points[i],Graph->points[i]);
-        }
+        rmExcessEdges(Graph);
         checkEdgePoints(Graph);
     }
     for(int i=0;i<Graph->p_sum;i++){

@@ -50,17 +50,23 @@ int main(int argc, char *argv[]) {
        printf("Soubor se nepodarilo otevrit\n");
        return 0;
     }
-
+    int y,z = 0;
+    int arr[10000];
     while (dynamic_fgets(&line, &linelen, file) != NULL) {
-    //fprintf(stdout,"vkladam riadok:%s",c);
+   
+   // fprintf(stdout,"vkladam riadok:%s",line[0]);
+    if (line[0]=='#') {arr[y]=z; y++; }
     insertstring(grafy, line);
+    z++;
+     //printf("cislo %d / %d\n",y,z);
+     //printf("cislo %d \n",arr[y-1]);
     }
     for (int i = 0; i < grafy->pocetriadkov; ++i){
       //fprintf(stdout,"%d. :", i);
      // fprintf(stdout,"%s", grafy->data[i]);
     }
       fclose(file);
-    solvegraph(grafy);//*grafy as input later on
+    solvegraph(grafy,arr);//*grafy as input later on
   }
     //pripadne argumenty pre debug a podobne
   else{
