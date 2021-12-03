@@ -10,15 +10,16 @@
 #include <stdbool.h>
 
 #include <ctype.h>
-int** parseGraph(Array *grafy){
+int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
     int j = 0;
-    int** matrixgraph = (int **) malloc(grafy->pocetriadkov * sizeof(int *));
-    for (int i = 1; i < grafy->pocetriadkov; ++i){   
+    int** matrixgraph = (int **) malloc(rowcount * sizeof(int *));
+    for (int i = beginG[index]+1; i < beginG[index]+rowcount; ++i){   
         int x = 0;
+        int ii=i-beginG[index];
         int str_length = strlen(grafy->data[i]);
         //    fprintf(stdout,"----%d.---- >/", str_length);
         int *riadok = (int *) malloc (str_length * sizeof (int));
-        matrixgraph[i-1] = (int *) malloc(1+str_length * sizeof(int));
+        matrixgraph[ii-1] = (int *) malloc(1+str_length * sizeof(int));
         int o = 2;
         //int matrixgraph[i][str_length];
 
@@ -31,7 +32,7 @@ int** parseGraph(Array *grafy){
                 x =  (x*10 + *riadok - '0' );
                 //fprintf(stdout,"rozsirujem cislo>%d \n", x); 
                 
-                matrixgraph[i-1][o-1] = x ;
+                matrixgraph[ii-1][o-1] = x ;
                 //fprintf(stdout,"vkladam cislo>%d na %dx%d\n", x,i,o-1);                     
             }
             else { 
@@ -39,7 +40,7 @@ int** parseGraph(Array *grafy){
                 x = 0;
                
                 o++;
-                 matrixgraph[i-1][0] = o - 3;
+                 matrixgraph[ii-1][0] = o - 3;
             }
 
         }
@@ -47,16 +48,15 @@ int** parseGraph(Array *grafy){
     }
     int a,b;
     //printf("\n");
-    grafy->pocetriadkov--;
-    for(a=0;a<grafy->pocetriadkov;a++)
+    for(a=0;a<rowcount-1;a++)
      {
           
           for(b=0;b<= matrixgraph[a][0]+1;b++)
           {
-               printf("%3d ",matrixgraph[a][b]);
+               //printf("%3d ",matrixgraph[a][b]);
                //Here, %3d takes 3 digit space for each digit while printing  output 
           }
-          printf("\n");
+          //printf("\n");
 
     }
     return matrixgraph;
@@ -231,12 +231,18 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
     freeParsed(matrixGraph);
 }
 void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
-    int GraphCount=Gcount;
-    for(int index=0;index<GraphCount;index++){
+    for(int index=0;index<Gcount;index++){
         int s=1;
         graph *Graph=(graph *)malloc(sizeof(graph));
-        int **matrixGraph=parseGraph(grafy);
-        initGraph(Graph,matrixGraph,grafy->pocetriadkov);//workaround nonexistent input
+        int rowCount=0;
+        if(index+1==Gcount){
+            rowCount=grafy->pocetriadkov-beginGraphs[index];
+        }
+        else{
+            rowCount=beginGraphs[index+1]-beginGraphs[index];
+        }
+        int **matrixGraph=parseGraph(grafy,beginGraphs,Gcount,index,rowCount);
+        initGraph(Graph,matrixGraph,rowCount-1);//workaround nonexistent input
         
         printf("Original no.%d\n",index+1);
         for(int i=0;i<Graph->p_sum;i++){
@@ -248,12 +254,12 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
             }
             printf("\n");
         }
-        if(Graph->p_sum>2){//true change for "Graph->p_sum>5"
+        if(Graph->p_sum>5){//true change for "Graph->p_sum>5"
             rmExcessEdges(Graph);
             checkEdgePoints(Graph);
+            rmExcessPoints(Graph);
         }
-
-        rmExcessPoints(Graph);
+        //Solve is there K33 or K5?
         /*while(Graph->p_sum>2){
             s=0;
         }*/
@@ -270,7 +276,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
         }
         freeGraph(Graph);
         char *answer[2]={"non-planar","planar"};
-        fprintf(stdout,"Graph is %s\n",answer[s]);
+        fprintf(stdout,"Graph is %s\n\n",answer[s]);
 
     }
 }
