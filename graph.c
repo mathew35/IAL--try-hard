@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
        printf("Soubor se nepodarilo otevrit\n");
        return 0;
     }
-    int y,z = 0;
+    int y = 0,z = 0;
     int arr[10000];
     while (dynamic_fgets(&line, &linelen, file) != NULL) {
    

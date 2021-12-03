@@ -13,6 +13,9 @@
 int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
     int j = 0;
     int** matrixgraph = (int **) malloc(rowcount * sizeof(int *));
+    for(int i=0;i<rowcount;i++){
+        matrixgraph[i]=NULL;
+    }
     for (int i = beginG[index]+1; i < beginG[index]+rowcount; ++i){   
         int x = 0;
         int ii=i-beginG[index];
@@ -20,6 +23,9 @@ int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
         //    fprintf(stdout,"----%d.---- >/", str_length);
         int *riadok = (int *) malloc (str_length * sizeof (int));
         matrixgraph[ii-1] = (int *) malloc(1+str_length * sizeof(int));
+        for(int j=0;j<str_length;j++){
+            matrixgraph[ii-1][j]=0;
+        }
         int o = 2;
         //int matrixgraph[i][str_length];
 
@@ -64,6 +70,9 @@ int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
 }
 void rearrEdges(point* P,int oldDegree){
     point** newEdges=(point **)malloc(sizeof(point)*P->degree);
+    for(int i=0;i<P->degree;i++){
+        newEdges[i]=NULL;
+    }
     if(newEdges!=NULL){
         int nEcounter=0;
         for(int i=0;i<oldDegree;i++){
@@ -165,12 +174,12 @@ void rmExcessEdges(graph* G){
     for(int i=0;i<G->p_sum;i++){
         rmEdge(G->points[i],G->points[i]);
     }
-    int *edges=malloc(sizeof(int)*G->p_sum);
+    int *edges=(int*)malloc(sizeof(int)*G->p_sum);
     for(int j=0;j<G->p_sum;j++){
         for(int i=0;i<G->p_sum;i++){
             edges[i]=0;
         }
-        for(int k=0;G->points[j]->edges[k];k++){
+        for(int k=0;k<G->points[j]->degree;k++){
             edges[G->points[j]->edges[k]->num-1]++;
         }
         for(int k=0;k<G->p_sum;k++){
