@@ -9,6 +9,7 @@
 typedef struct tpoint{
     size_t num;
     struct tpoint** edges;
+    size_t edgesmemory;
     struct tpoint* n_point;
     size_t degree;
     bool visited;

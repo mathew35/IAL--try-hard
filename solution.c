@@ -69,7 +69,8 @@ int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
     
 }
 void rearrEdges(point* P,int oldDegree){
-    point** newEdges=(point **)malloc(sizeof(point)*P->degree);
+    //no malloc!
+    /*point** newEdges=(point **)malloc(sizeof(point)*P->degree);
     for(int i=0;i<P->degree;i++){
         newEdges[i]=NULL;
     }
@@ -83,10 +84,33 @@ void rearrEdges(point* P,int oldDegree){
         }
         free(P->edges);
         P->edges=newEdges;
+    }*/
+    //new rearredges
+    //printf("OldeDeg:NewDeg:: %d|%ld\n",oldDegree,P->degree);
+    for(int i=0;i<P->degree;i++){
+        if(P->edges[i]==NULL){
+            while(P->edges[oldDegree-1]==NULL && oldDegree>i){
+                oldDegree--;
+            }
+            P->edges[i]=P->edges[oldDegree-1];
+            P->edges[oldDegree-1]=NULL;
+            oldDegree--;
+        }
+    }
+    if(oldDegree*4<P->edgesmemory){
+        P->edgesmemory /=2;
+        point **newEdges=realloc(P->edges,sizeof(point)*P->edgesmemory);
+        //check if realloced properly
+        if(P->edges==NULL){
+            printf("realloc ERROR\n");
+            exit(1);
+        }
+        P->edges=newEdges;
     }
 }
 void addEdge(point* P1,point* P2){
-    point** newEdges=malloc(sizeof(point)*(P1->degree+1));
+    //reduce malloc
+    /*point** newEdges=malloc(sizeof(point)*(P1->degree+1));
     for(int i=0;i<P1->degree;i++){
         newEdges[i]=P1->edges[i];
     };
@@ -94,7 +118,20 @@ void addEdge(point* P1,point* P2){
     point** tmp=P1->edges;
     P1->edges=newEdges;
     P1->degree++;
-    free(tmp);
+    free(tmp);*/
+    //new addEdge
+    if(P1->edgesmemory==P1->degree){
+        P1->edgesmemory *=2;
+        point **newEdges=realloc(P1->edges,sizeof(point)*P1->edgesmemory);
+        //check if realloced properly
+        if(P1->edges==NULL){
+            printf("realloc ERROR\n");
+            exit(1);
+        }
+        P1->edges=newEdges;
+    }
+    P1->edges[P1->degree]=P2;
+    P1->degree++;
 }
 void checkEdgePoints(graph *G){
     for(int i=0;i<G->p_sum;i++){
@@ -121,8 +158,10 @@ void rmEdge(point* P1,point* P2){
             P1->degree--;
         }
         j++;
-    }             
-    rearrEdges(P1,actDegree); 
+    }
+    if(P1->degree!=actDegree){
+        rearrEdges(P1,actDegree);
+    }
 }
 void tieEdge(point* P1,point* P2){
     bool haveEdge=false;
@@ -139,7 +178,6 @@ void tieEdge(point* P1,point* P2){
     }
 }
 void rmPoint(graph* G,int i){
-    point** newPoints=(point**)malloc(sizeof(point)*(G->p_sum-1));
     if(G->points[i]->degree>0){
         rmEdge(G->points[i]->edges[0],G->points[i]);
     }
@@ -147,18 +185,11 @@ void rmPoint(graph* G,int i){
         rmEdge(G->points[i]->edges[1],G->points[i]);
         tieEdge(G->points[i]->edges[0],G->points[i]->edges[1]);
     }
-    point** tmp=G->points;
-    for(int j=0;j<i;j++){
-        newPoints[j]=G->points[j];
-    }
-    for(int j=i+1;j<G->p_sum;j++){
-        newPoints[j-1]=G->points[j];
-    }
     free(G->points[i]->edges);
     free(G->points[i]);
-    G->points=newPoints;
     G->p_sum--;
-    free(tmp);
+    G->points[i]=G->points[G->p_sum];
+    G->points[G->p_sum]=NULL;
 }
 void rmExcessPoints(graph* G){
     int i=0;
@@ -197,7 +228,6 @@ void freeGraph(graph* G){
         free(G->points[i]);
     }
     free(G->points);
-    free(G);
 }
 void freeParsed(int** matrix){
     int i=0;
@@ -215,6 +245,7 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
         G->points[i]->degree=matrixGraph[i][0];
         G->points[i]->num=matrixGraph[i][1];
         G->points[i]->edges=(point **)malloc(sizeof(point)*G->points[i]->degree);
+        G->points[i]->edgesmemory=G->points[i]->degree;
         for(int j=0;j<G->points[i]->degree;j++){
             G->points[i]->edges[j]=G->points[matrixGraph[i][j+2]-1];
         }
@@ -240,9 +271,9 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
     freeParsed(matrixGraph);
 }
 void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
+    graph *Graph=(graph *)malloc(sizeof(graph));
     for(int index=0;index<Gcount;index++){
         int s=1;
-        graph *Graph=(graph *)malloc(sizeof(graph));
         int rowCount=0;
         if(index+1==Gcount){
             rowCount=grafy->pocetriadkov-beginGraphs[index];
@@ -263,6 +294,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
             }
             printf("\n");
         }
+        
         if(Graph->p_sum>5){//true change for "Graph->p_sum>5"
             rmExcessEdges(Graph);
             checkEdgePoints(Graph);
@@ -283,9 +315,10 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
             }
             printf("\n");
         }
+        
         freeGraph(Graph);
         char *answer[2]={"non-planar","planar"};
         fprintf(stdout,"Graph is %s\n\n",answer[s]);
-
     }
+    free(Graph);
 }
