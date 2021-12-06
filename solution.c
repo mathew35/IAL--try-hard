@@ -261,7 +261,7 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
         else{
             G->points[i]->n_point=NULL;
         }
-    };
+    }
     for(int i=0;i<G->p_sum;i++){
         for(int j=0;j<G->points[i]->degree;j++){
             G->points[i]->edges[j]=G->points[matrixGraph[i][j+2]-1];
@@ -272,7 +272,7 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
         else{
             G->points[i]->n_point=NULL;
         }
-    };
+    }
     G->first_p=G->points[0];
     freeParsed(matrixGraph);
 }
