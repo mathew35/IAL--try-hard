@@ -2,7 +2,7 @@
 PRJ=graph_generator
 #
 CC=gcc
-CFLAGS=-Wall -std=c99 -pedantic -lm -lpcap
+CFLAGS=-Wall -std=c99 -pedantic
 
 all: $(PRJ)
 
