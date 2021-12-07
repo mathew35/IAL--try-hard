@@ -218,10 +218,21 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
     G->p_sum=rowCount;
     G->points=(point **)malloc(sizeof(point)*G->p_sum);
     if(G->points==NULL){
+        freeGraph(G);
+        free(G);
+        freeParsed(matrixGraph);
+        printf("Malloc failed\n");
         exit(0);
     }
     for(int i=0;i<G->p_sum;i++){
         G->points[i]=(point *)malloc(sizeof(point));
+        if(G->points[i]==NULL){
+            freeGraph(G);
+            free(G);
+            freeParsed(matrixGraph);
+            printf("Malloc failed\n");
+            exit(0);
+        }
         G->points[i]->degree=matrixGraph[i][0];
         G->points[i]->num=matrixGraph[i][1];
         G->points[i]->edges=(point **)malloc(sizeof(point)*G->points[i]->degree);
@@ -235,7 +246,7 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
         else{
             G->points[i]->n_point=NULL;
         }
-    };
+    }
     for(int i=0;i<G->p_sum;i++){
         for(int j=0;j<G->points[i]->degree;j++){
             G->points[i]->edges[j]=G->points[matrixGraph[i][j+2]-1];
@@ -246,7 +257,7 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
         else{
             G->points[i]->n_point=NULL;
         }
-    };
+    }
     G->first_p=G->points[0];
     freeParsed(matrixGraph);
 }
@@ -277,6 +288,7 @@ point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,in
     for(int j=0;j<*c2;j++){
         if(P==connect2[j]){
             match[k]=connect2[j];
+            k++;
             newCount++;
             pointB=true;
         } 
@@ -286,6 +298,7 @@ point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,in
             for(int j=0;j<*c2;j++){
                if(connect1[i]==connect2[j]){
                    match[k]=connect1[i];
+                   k++;
                    newCount++;
                } 
             }
@@ -299,7 +312,7 @@ point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,in
     return match;
 }
 void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
-    graph *Graph=(graph *)malloc(sizeof(graph));
+    graph *Graph=malloc(sizeof(graph));
     for(int index=0;index<Gcount;index++){
         int s=1;
         int rowCount=0;
@@ -312,33 +325,33 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
         int **matrixGraph=parseGraph(grafy,beginGraphs,Gcount,index,rowCount);
         initGraph(Graph,matrixGraph,rowCount-1);//workaround nonexistent input
         
-        printf("Original no.%d\n",index+1);
-        for(int i=0;i<Graph->p_sum;i++){
-            printf("Point:%ld|",Graph->points[i]->num);
-            for(int j=0;j<Graph->points[i]->degree;j++){
-                if(Graph->points[i]->edges[j]!=NULL){
-                    printf("%ld ",Graph->points[i]->edges[j]->num);                
-                }
-            }
-            printf("\n");
-        }
+        // printf("Original no.%d\n",index+1);
+        // for(int i=0;i<Graph->p_sum;i++){
+            // printf("Point:%ld|",Graph->points[i]->num);
+            // for(int j=0;j<Graph->points[i]->degree;j++){
+                // if(Graph->points[i]->edges[j]!=NULL){
+                    // printf("%ld ",Graph->points[i]->edges[j]->num);                
+                // }
+            // }
+            // printf("\n");
+        // }
         int j=0;
-        if(Graph->p_sum>5){
+        if(Graph->p_sum>4){
             rmExcessEdges(Graph);
             checkEdgePoints(Graph);
             rmExcessPoints(Graph);
         }
-        printf("\n");
-        printf("Not-Solved no.%d\n",index+1);
-        for(int i=0;i<Graph->p_sum;i++){
-            printf("Point:%ld|",Graph->points[i]->num);
-            for(int j=0;j<Graph->points[i]->degree;j++){
-                if(Graph->points[i]->edges[j]!=NULL){
-                    printf("%ld ",Graph->points[i]->edges[j]->num);                
-                }
-            }
-            printf("\n");
-        }
+        // printf("\n");
+        // printf("Not-Solved no.%d\n",index+1);
+        // for(int i=0;i<Graph->p_sum;i++){
+            // printf("Point:%ld|",Graph->points[i]->num);
+            // for(int j=0;j<Graph->points[i]->degree;j++){
+                // if(Graph->points[i]->edges[j]!=NULL){
+                    // printf("%ld ",Graph->points[i]->edges[j]->num);                
+                // }
+            // }
+            // printf("\n");
+        // }
         //Solve is there K33 or K5?
         int k=0;
         int con=Graph->p_sum;
@@ -351,11 +364,12 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
             connectednum[i]=malloc(sizeof(point**)*Graph->p_sum);
         }
         bool end=false;
+        j=Graph->p_sum;
         while(Graph->p_sum>4&&!end){
+            bool rm=false;
             if(k<=j){
                 //K3,3 must be before K5 if k5 removes edges/points
                 //K5
-                bool rm=false;
                 for(int i=0;i<Graph->points[k]->degree;i++){
                     connected[i]=0;
                 }
@@ -378,15 +392,15 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                         interconnected++;
                     }
                 }
-                //diff for k33 if( >5)
-                if(interconnected>4){
+                //diff for k33 if( >4)
+                if(interconnected>3){
                     //check overlap in connectednum K5
                     //use m only if array ??
                     for(int i=1;i<Graph->points[k]->degree;i++){
                         m=0;
                         int n=i;
                         int prevCount=0;
-                        point **prevconnection=getSame(Graph->points[k]->edges,connectednum[n],&prevCount,n,connected[n]);
+                        point **prevconnection=getSame(Graph->points[k]->edges,connectednum[n],&prevCount,Graph->points[k]->degree,connected[n]);
                         //printf("prevcount:%d\n",prevCount);
                         if(prevCount>0){
                             //point **sameconnection=getSame();
@@ -394,7 +408,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                             for(int o=n+1;o<Graph->points[k]->degree-1;o++){
                                 //1 rovnaky + 2 predosle
                                 int prevCount2=0;
-                                point **prevconnection2=getSame(Graph->points[k]->edges,connectednum[o],&prevCount2,o,connected[o]);
+                                point **prevconnection2=getSame(Graph->points[k]->edges,connectednum[o],&prevCount2,Graph->points[k]->degree,connected[o]);
                                 // printf("Point:%ld Edge:%ld\n",Graph->points[k]->num,Graph->points[k]->edges[o]->num);
                                 // printf("PrevPoint:%ld",Graph->points[k]->edges[n]->num);
                                 // printf("prevcount21:%d\n",prevCount2);
@@ -405,7 +419,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                                     for(int p=o+1;p<Graph->points[k]->degree;p++){
                                         //3 predosle
                                         int prevCount3=0;
-                                        point **prevconnection3=getSame(Graph->points[k]->edges,connectednum[p],&prevCount3,p,connected[p]);
+                                        point **prevconnection3=getSame(Graph->points[k]->edges,connectednum[p],&prevCount3,Graph->points[k]->degree,connected[p]);
                                         // printf("Point:%ld Edge:%ld\n",Graph->points[k]->num,Graph->points[k]->edges[p]->num);
                                         // printf("PrevPoint:%ld",Graph->points[k]->edges[o]->num);
                                         // printf("prevcount31:%d\n",prevCount3);
@@ -415,6 +429,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                                         if(prevCount3>2){
                                             printf("K5 found\n");
                                             s=0;
+                                            end=true;
                                             p=i=n=o=Graph->points[k]->degree;
                                             //found K5
                                         }
@@ -463,21 +478,23 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                         // printf("\n");
                     // }
                     k=-1;
+                    rm=true;
                     j--;
                     //printf("---------again---------");
                 }
                 //printf("\n");
             }
             else{
-                s=0;
                 end=true;
             }
-            k++;
+            if(!rm){
                 if(Graph->points[k]->degree<4){
                     rmPoint(Graph,k);
                     k=-1;
                     j--;
                 }
+            }
+            k++;
             
         }
         for(int i=0;i<con;i++){
@@ -485,17 +502,17 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
         }
         free(connectednum);
         free(connected);
-        printf("\n");
-        printf("Solved no.%d\n",index+1);
-        for(int i=0;i<Graph->p_sum;i++){
-            printf("Point:%ld|",Graph->points[i]->num);
-            for(int j=0;j<Graph->points[i]->degree;j++){
-                if(Graph->points[i]->edges[j]!=NULL){
-                    printf("%ld ",Graph->points[i]->edges[j]->num);                
-                }
-            }
-            printf("\n");
-        }
+        // printf("\n");
+        // printf("Solved no.%d\n",index+1);
+        // for(int i=0;i<Graph->p_sum;i++){
+            // printf("Point:%ld|",Graph->points[i]->num);
+            // for(int j=0;j<Graph->points[i]->degree;j++){
+                // if(Graph->points[i]->edges[j]!=NULL){
+                    // printf("%ld ",Graph->points[i]->edges[j]->num);                
+                // }
+            // }
+            // printf("\n");
+        // }
         
         freeGraph(Graph);
         char *answer[2]={"non-planar","planar"};
