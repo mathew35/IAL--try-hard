@@ -384,38 +384,45 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                         }
                         if(Count>2){
                             for(int m=0;m<P2->degree;m++){
-                                for(int n=0;n<P2->edges[m]->degree;n++){
-                                    point* P3=P2->edges[m]->edges[n];
-                                    int Count2=0;
-                                    point** connections2=NULL;
-                                    if(P2!=P3){
-                                        connections2=getSame(P2->edges,P3->edges,&Count2,P2->degree,P3->degree);
-                                        connections2=matchPoints(P2->edges,connections2,P2->degree,&Count2,P2->edges[m],P2->degree,method);
-                                        connections2=matchPoints(P2->edges,connections2,P2->degree,&Count2,P1->edges[i],P2->degree,method);
+                                if(P2->edges[m]!=P1->edges[i]){
+                                    for(int n=0;n<P2->edges[m]->degree;n++){
+                                        point* P3=P2->edges[m]->edges[n];
+                                        int Count2=0;
+                                        point** connections2=NULL;
+                                        if((P2!=P3)&&(P1!=P3)){
+                                            connections2=getSame(P2->edges,P3->edges,&Count2,P2->degree,P3->degree);
+                                            connections2=matchPoints(connections,connections2,P2->degree,&Count2,P2->edges[m],P2->degree,method);
+                                            connections2=matchPoints(P2->edges,connections2,P2->degree,&Count2,P1->edges[i],P2->degree,method);
+                                        }
+                                        if(Count2>2){
+                                            //check if get through points edges are right ?
+                                            end=true;
+                                            foundK33=true;
+                                            //printf("K33 found\n");
+                                            s=0;
+                                            n=P2->edges[m]->degree;
+                                        }
+                                        free(connections2);
                                     }
-                                    if(Count2>2){
-                                        //check if get through points edges are right ?
-                                        end=true;
-                                        foundK33=true;
-                                        printf("K33 found\n");
-                                        s=0;
-                                        n=P2->edges[m]->degree;
+                                    if(end){
+                                        m=P2->degree;
                                     }
-                                    free(connections2);
-                                }
-                                if(foundK33){
-                                    m=P2->degree;
                                 }
                             }
                             free(connections);
                         }
-                        if(foundK33){
+                        if(end){
                             l=P1->edges[i]->degree;
                         }
                     }
-                    if(foundK33){
+                    if(end){
                         i=P1->degree;
                     }
+                }
+                if(P1->degree<4){     
+                    rmPoint(Graph,k);
+                    k=-1;
+                    j--;
                 }
             }
             else{
@@ -488,7 +495,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                                         prevconnection3=matchPoints(prevconnection2,prevconnection3,prevCount2,&prevCount3,Graph->points[k]->edges[o],Graph->points[k]->degree,method);
                                         // printf("prevcount32:%d\n",prevCount3);
                                         if(prevCount3>2){
-                                            printf("K5 found\n");
+                                            //printf("K5 found\n");
                                             s=0;
                                             end=true;
                                             p=i=n=o=Graph->points[k]->degree;
