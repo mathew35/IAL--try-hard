@@ -170,10 +170,10 @@ void rmPoint(graph* G,int i){
 }
 void rmExcessPoints(graph* G){
     int i=0;
-    while(i<G->p_sum&&G->p_sum>2){
+    while(i<G->p_sum&&G->p_sum>4){
         if(G->points[i]->degree<3){
             rmPoint(G,i);
-            i--;
+            i=-1;
         }
         i++;
     }
@@ -263,6 +263,7 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
 }
 point **getSame(point** P1,point** P2,int *count,int i,int k){
     point** connections=malloc(sizeof(point*)*k);
+    if(connections==NULL){exit(0);}
     for(int j=0;j<k;j++){
         connections[j]=NULL;
     }
@@ -277,7 +278,7 @@ point **getSame(point** P1,point** P2,int *count,int i,int k){
     }
     return connections;
 }
-point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,int l){
+point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,int l,bool method){
     bool pointB=false;
     int k=0;
     int newCount=0;
@@ -288,8 +289,10 @@ point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,in
     for(int j=0;j<*c2;j++){
         if(P==connect2[j]){
             match[k]=connect2[j];
-            k++;
-            newCount++;
+            if(method){
+                newCount++;
+                k++;
+            }
             pointB=true;
         } 
     }
@@ -353,7 +356,6 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
             // printf("\n");
         // }
         //Solve is there K33 or K5?
-        int k=0;
         int con=Graph->p_sum;
         int *connected=malloc(sizeof(int)*Graph->p_sum);
         for(int i=0;i<Graph->p_sum;i++){
@@ -363,19 +365,78 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
         for(int i=0;i<Graph->p_sum;i++){
             connectednum[i]=malloc(sizeof(point**)*Graph->p_sum);
         }
-        bool end=false;
+        bool end=false,foundK33=false;
+        //K3,3 must be before K5 because K5 removes edges/points
         j=Graph->p_sum;
+        int k=0;
+        bool method=false;
+        while(Graph->p_sum>5&&!end){
+            if(k<j){
+                point* P1=Graph->points[k];
+                for(int i=0;i<P1->degree;i++){
+                    for(int l=0;l<P1->edges[i]->degree;l++){
+                        point* P2=P1->edges[i]->edges[l];
+                        int Count=0;
+                        point** connections=NULL;
+                        if(P2!=P1){
+                            connections=getSame(P1->edges,P2->edges,&Count,P1->degree,P2->degree);
+                            connections=matchPoints(P1->edges,connections,P1->degree,&Count,P1->edges[i],P1->degree,method);
+                        }
+                        if(Count>2){
+                            for(int m=0;m<P2->degree;m++){
+                                for(int n=0;n<P2->edges[m]->degree;n++){
+                                    point* P3=P2->edges[m]->edges[n];
+                                    int Count2=0;
+                                    point** connections2=NULL;
+                                    if(P2!=P3){
+                                        connections2=getSame(P2->edges,P3->edges,&Count2,P2->degree,P3->degree);
+                                        connections2=matchPoints(P2->edges,connections2,P2->degree,&Count2,P2->edges[m],P2->degree,method);
+                                        connections2=matchPoints(P2->edges,connections2,P2->degree,&Count2,P1->edges[i],P2->degree,method);
+                                    }
+                                    if(Count2>2){
+                                        //check if get through points edges are right ?
+                                        end=true;
+                                        foundK33=true;
+                                        printf("K33 found\n");
+                                        s=0;
+                                        n=P2->edges[m]->degree;
+                                    }
+                                    free(connections2);
+                                }
+                                if(foundK33){
+                                    m=P2->degree;
+                                }
+                            }
+                            free(connections);
+                        }
+                        if(foundK33){
+                            l=P1->edges[i]->degree;
+                        }
+                    }
+                    if(foundK33){
+                        i=P1->degree;
+                    }
+                }
+            }
+            else{
+                end=true;
+            }
+            k++;
+        }
+        if(!foundK33){
+            end=false;
+        }
+        //K5
+        k=0;
+        method=true;
         while(Graph->p_sum>4&&!end){
             bool rm=false;
-            if(k<=j){
-                //K3,3 must be before K5 if k5 removes edges/points
-                //K5
+            if(k<j){
                 for(int i=0;i<Graph->points[k]->degree;i++){
                     connected[i]=0;
                 }
                 int interconnected=0;
                 int m=0;
-
                 for(int i=0;i<Graph->points[k]->degree;i++){
                     m=0;
                     for(int l=0;l<Graph->points[k]->edges[i]->degree;l++){                        
@@ -408,12 +469,12 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                             for(int o=n+1;o<Graph->points[k]->degree-1;o++){
                                 //1 rovnaky + 2 predosle
                                 int prevCount2=0;
-                                point **prevconnection2=getSame(Graph->points[k]->edges,connectednum[o],&prevCount2,Graph->points[k]->degree,connected[o]);
+                                point **prevconnection2=getSame(Graph->points[k]->edges,connectednum[o],&prevCount2,Graph->points[k]->degree+1,connected[o]);
                                 // printf("Point:%ld Edge:%ld\n",Graph->points[k]->num,Graph->points[k]->edges[o]->num);
                                 // printf("PrevPoint:%ld",Graph->points[k]->edges[n]->num);
                                 // printf("prevcount21:%d\n",prevCount2);
                                 //check if prevconnections match at least 1 match + num of prev point
-                                prevconnection2=matchPoints(prevconnection,prevconnection2,prevCount,&prevCount2,Graph->points[k]->edges[n],Graph->points[k]->degree);
+                                prevconnection2=matchPoints(prevconnection,prevconnection2,prevCount,&prevCount2,Graph->points[k]->edges[n],Graph->points[k]->degree,method);
                                 // printf("prevcount22:%d\n",prevCount2);
                                 if(prevCount2>1){
                                     for(int p=o+1;p<Graph->points[k]->degree;p++){
@@ -424,7 +485,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                                         // printf("PrevPoint:%ld",Graph->points[k]->edges[o]->num);
                                         // printf("prevcount31:%d\n",prevCount3);
                                         //check if prevconnections match at least 1 match + num of prev point
-                                        prevconnection3=matchPoints(prevconnection2,prevconnection3,prevCount2,&prevCount3,Graph->points[k]->edges[o],Graph->points[k]->degree);
+                                        prevconnection3=matchPoints(prevconnection2,prevconnection3,prevCount2,&prevCount3,Graph->points[k]->edges[o],Graph->points[k]->degree,method);
                                         // printf("prevcount32:%d\n",prevCount3);
                                         if(prevCount3>2){
                                             printf("K5 found\n");
