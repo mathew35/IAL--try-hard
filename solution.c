@@ -1,6 +1,7 @@
 /*
 *
 * @author Matúš Vráblik <xvrabl05@vutbr.cz>
+* @author Daniel Mlynarič <xmlyna10@vutbr.cz>
 */
 #include <string.h>
 #include "solution.h"
