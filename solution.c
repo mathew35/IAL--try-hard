@@ -416,9 +416,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                 }
                 if(interconnected>3){
                     //check overlap in connectednum K5
-                    for(int i=0;i<Graph->points[k]->degree;i++){
-                        m=0;
-                        int n=i;
+                    for(int n=0;n<Graph->points[k]->degree;n++){
                         int prevCount=0;
                         point **prevconnection=getSame(Graph->points[k]->edges,connectednum[n],&prevCount,Graph->points[k]->degree,connected[n]);
                         if(prevCount>2){
@@ -433,14 +431,26 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                                         int prevSize3=connected[p];
                                         point **prevconnection3=getSame(Graph->points[k]->edges,connectednum[p],&prevCount3,Graph->points[k]->degree,connected[p]);
                                         prevconnection3=matchPoints(prevconnection2,prevconnection3,prevCount2,&prevCount3,Graph->points[k]->edges[o],Graph->points[k]->degree,&prevSize3,method);
+                                        prevconnection3=matchPoints(prevconnection3,prevconnection3,prevCount3,&prevCount3,Graph->points[k]->edges[n],Graph->points[k]->degree,&prevSize3,method);
                                         if(prevCount3>2){
-                                            s=0;
-                                            end=true;
-                                            p=i=n=o=Graph->points[k]->degree;
-                                            //found K5
-                                        }
-                                        else if(p+1==Graph->points[k]->degree && o+2==Graph->points[k]->degree && n+3==Graph->points[k]->degree){                                            
-                                            rm=true;
+                                            for(int i=p+1;i<Graph->points[k]->degree;i++){
+                                                int prevCount4=0;
+                                                int prevSize4=connected[i];
+                                                point **prevconnection4=getSame(Graph->points[k]->edges,connectednum[i],&prevCount4,Graph->points[k]->degree,connected[i]);
+                                                prevconnection4=matchPoints(prevconnection3,prevconnection4,prevCount3,&prevCount4,Graph->points[k]->edges[p],Graph->points[k]->degree,&prevSize4,method);
+                                                prevconnection4=matchPoints(prevconnection4,prevconnection4,prevCount4,&prevCount4,Graph->points[k]->edges[o],Graph->points[k]->degree,&prevSize4,false);                                               
+                                                prevconnection4=matchPoints(prevconnection4,prevconnection4,prevCount4,&prevCount4,Graph->points[k]->edges[o],Graph->points[k]->degree,&prevSize4,false);                                               
+                                                if(prevCount4>2){
+                                                    s=0;
+                                                    end=true;
+                                                    p=n=o=Graph->points[k]->degree;
+                                                    //found K5
+                                                }
+                                                else if(i+1==Graph->points[k]->degree && p+2==Graph->points[k]->degree && o+3==Graph->points[k]->degree && n+4==Graph->points[k]->degree){                                            
+                                                    rm=true;
+                                                }
+                                                free(prevconnection4);
+                                            }
                                         }
                                         free(prevconnection3);
                                     }    
