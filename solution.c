@@ -236,9 +236,7 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
 }
 point **getSame(point** P1,point** P2,int *count,int i,int k){
     point** connections=malloc(sizeof(point*)*k);
-    if(connections==NULL){        
-        freeGraph(G);
-        free(G);
+    if(connections==NULL){   
         printf("Malloc ERROR\n");
         exit(-1);
     }
@@ -288,7 +286,7 @@ point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,in
         if(*size+1>=l){
             point** match=NULL;
             match=malloc(sizeof(point*)*l*2);
-            if(edges==NULL){
+            if(match==NULL){
                 printf("Malloc ERROR\n");
                 exit(-1);
             }
