@@ -351,7 +351,7 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                                             int size2=P3->degree-1;
                                             connections2=getSame(P2->edges,P3->edges,&Count2,P2->degree,P3->degree);
                                             connections2=matchPoints(connections,connections2,Count,&Count2,P2->edges[m],P2->degree,&size2,method);
-                                            connections2=matchPoints(P2->edges,connections2,Count,&Count2,P1->edges[i],P2->degree,&size2,method);
+                                            connections2=matchPoints(P2->edges,connections2,P2->degree,&Count2,P1->edges[i],P2->degree,&size2,method);
                                         }
                                         if(Count2>2){
                                             end=true;
@@ -416,18 +416,18 @@ void solvegraph(Array *grafy,int *beginGraphs,int Gcount){
                 }
                 if(interconnected>3){
                     //check overlap in connectednum K5
-                    for(int i=1;i<Graph->points[k]->degree;i++){
+                    for(int i=0;i<Graph->points[k]->degree;i++){
                         m=0;
                         int n=i;
                         int prevCount=0;
                         point **prevconnection=getSame(Graph->points[k]->edges,connectednum[n],&prevCount,Graph->points[k]->degree,connected[n]);
-                        if(prevCount>0){
+                        if(prevCount>2){
                             for(int o=n+1;o<Graph->points[k]->degree-1;o++){
                                 int prevCount2=0;
                                 int prevSize2=connected[o];
                                 point **prevconnection2=getSame(Graph->points[k]->edges,connectednum[o],&prevCount2,Graph->points[k]->degree,connected[o]);
                                 prevconnection2=matchPoints(prevconnection,prevconnection2,prevCount,&prevCount2,Graph->points[k]->edges[n],Graph->points[k]->degree,&prevSize2,method);
-                                if(prevCount2>1){
+                                if(prevCount2>2){
                                     for(int p=o+1;p<Graph->points[k]->degree;p++){
                                         int prevCount3=0;
                                         int prevSize3=connected[p];
