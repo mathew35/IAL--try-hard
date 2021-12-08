@@ -20,7 +20,7 @@ int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
         int x = 0;
         int ii=i-beginG[index];
         int str_length = strlen(grafy->data[i]);
-        int *riadok = (int *) malloc (str_length * sizeof (int));
+        int *line = (int *) malloc (str_length * sizeof (int));
         matrixgraph[ii-1] = (int *) malloc(1+str_length * sizeof(int));
         for(int j=0;j<str_length;j++){
             matrixgraph[ii-1][j]=0;
@@ -28,8 +28,8 @@ int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
         int o = 2;
         for (j = 0; grafy->data[i][j] != '\0'; j++) {                
             if (isdigit(grafy->data[i][j])){
-                *riadok = grafy->data[i][j];
-                x =  (x*10 + *riadok - '0' );                
+                *line = grafy->data[i][j];
+                x =  (x*10 + *line - '0' );                
                 matrixgraph[ii-1][o-1] = x ;                 
             }
             else { 
@@ -38,7 +38,7 @@ int** parseGraph(Array *grafy,int * beginG,int Gcount, int index,int rowcount){
                  matrixgraph[ii-1][0] = o - 3;
             }
         }
-        free(riadok);
+        free(line);
     }
     return matrixgraph;
     
@@ -59,8 +59,8 @@ void rearrEdges(point* P,int oldDegree){
         point **newEdges=realloc(P->edges,sizeof(point)*P->edgesmemory);
         //check if realloced properly
         if(P->edges==NULL){
-            printf("realloc ERROR\n");
-            exit(1);
+            printf("Realloc ERROR\n");
+            exit(-1);
         }
         P->edges=newEdges;
     }
@@ -71,8 +71,8 @@ void addEdge(point* P1,point* P2){
         point **newEdges=realloc(P1->edges,sizeof(point)*P1->edgesmemory);
         //check if realloced properly
         if(P1->edges==NULL){
-            printf("realloc ERROR\n");
-            exit(1);
+            printf("Realloc ERROR\n");
+            exit(-1);
         }
         P1->edges=newEdges;
     }
@@ -158,6 +158,10 @@ void rmExcessEdges(graph* G){
         rmEdge(G->points[i],G->points[i]);
     }
     int *edges=(int*)malloc(sizeof(int)*G->p_sum);
+    if(edges==NULL){
+        printf("Malloc ERROR\n");
+        exit(-1);
+    }
     for(int j=0;j<G->p_sum;j++){
         for(int i=0;i<G->p_sum;i++){
             edges[i]=0;
@@ -196,8 +200,8 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
         freeGraph(G);
         free(G);
         freeParsed(matrixGraph);
-        printf("Malloc failed\n");
-        exit(0);
+        printf("Malloc ERROR\n");
+        exit(-1);
     }
     for(int i=0;i<G->p_sum;i++){
         G->points[i]=(point *)malloc(sizeof(point));
@@ -205,12 +209,19 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
             freeGraph(G);
             free(G);
             freeParsed(matrixGraph);
-            printf("Malloc failed\n");
-            exit(0);
+            printf("Malloc ERROR\n");
+            exit(-1);
         }
         G->points[i]->degree=matrixGraph[i][0];
         G->points[i]->num=matrixGraph[i][1];
         G->points[i]->edges=(point **)malloc(sizeof(point)*G->points[i]->degree);
+        if(G->points[i]->edges==NULL){
+            freeGraph(G);
+            free(G);
+            freeParsed(matrixGraph);
+            printf("Malloc ERROR\n");
+            exit(-1);
+        }
         G->points[i]->edgesmemory=G->points[i]->degree;
         for(int j=0;j<G->points[i]->degree;j++){
             G->points[i]->edges[j]=G->points[matrixGraph[i][j+2]-1];
@@ -225,7 +236,12 @@ void initGraph(graph *G,int** matrixGraph,int rowCount){
 }
 point **getSame(point** P1,point** P2,int *count,int i,int k){
     point** connections=malloc(sizeof(point*)*k);
-    if(connections==NULL){exit(0);}
+    if(connections==NULL){        
+        freeGraph(G);
+        free(G);
+        printf("Malloc ERROR\n");
+        exit(-1);
+    }
     for(int j=0;j<k;j++){
         connections[j]=NULL;
     }
@@ -272,6 +288,10 @@ point **matchPoints(point** connect1,point** connect2,int c1,int *c2,point* P,in
         if(*size+1>=l){
             point** match=NULL;
             match=malloc(sizeof(point*)*l*2);
+            if(edges==NULL){
+                printf("Malloc ERROR\n");
+                exit(-1);
+            }
             for(int i=0;i<l;i++){
                 match[i]=NULL;
             }
